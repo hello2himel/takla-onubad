@@ -32,7 +32,7 @@ const UNSAFE_PATTERNS = [
 // State Management
 let config = {
     apiKey: '',
-    model: 'anthropic/claude-3.5-sonnet',
+    model: 'arcee-ai/trinity-large-preview',
     temperature: 0.2,
     streaming: true,
     safety: true
@@ -45,16 +45,19 @@ const elements = {
     apiKeyInput: document.getElementById('apiKey'),
     modelSelect: document.getElementById('modelSelect'),
     customModelInput: document.getElementById('customModel'),
+    storeLocalCheckbox: document.getElementById('storeLocal'),
     testKeyBtn: document.getElementById('testKeyBtn'),
     saveKeyBtn: document.getElementById('saveKeyBtn'),
     testStatus: document.getElementById('testStatus'),
+    themeToggle: document.getElementById('themeToggle'),
     settingsBtn: document.getElementById('settingsBtn'),
+    currentModelSpan: document.getElementById('currentModel'),
     taklaBanglaInput: document.getElementById('taklaBanglaInput'),
     bengaliOutput: document.getElementById('bengaliOutput'),
     translateBtn: document.getElementById('translateBtn'),
     copyBtn: document.getElementById('copyBtn'),
+    selectAllBtn: document.getElementById('selectAllBtn'),
     clearInputBtn: document.getElementById('clearInputBtn'),
-    clearOutputBtn: document.getElementById('clearOutputBtn'),
     charCount: document.getElementById('charCount'),
     estimatedCost: document.getElementById('estimatedCost'),
     tempSlider: document.getElementById('tempSlider'),
@@ -68,12 +71,57 @@ const elements = {
 // Initialize App
 function init() {
     loadConfig();
+    initTheme();
     setupEventListeners();
     
     if (config.apiKey) {
         elements.setupModal.style.display = 'none';
         elements.mainApp.style.display = 'block';
+        updateModelDisplay();
     }
+}
+
+// Theme Management
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+    }
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : currentTheme === 'light' ? 'dark' : 
+                     window.matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+}
+
+function updateThemeIcon(theme) {
+    const sunIcon = elements.themeToggle.querySelector('.sun');
+    const moonIcon = elements.themeToggle.querySelector('.moon');
+    
+    if (theme === 'dark') {
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'block';
+    } else {
+        sunIcon.style.display = 'block';
+        moonIcon.style.display = 'none';
+    }
+}
+
+function updateModelDisplay() {
+    const modelName = config.model === 'arcee-ai/trinity-large-preview' ? 'Trinity Large 400B' :
+                      config.model === 'upstage/solar-pro-3' ? 'Solar Pro 3 102B' :
+                      config.model === 'liquid/lfm-2.5-1.2b-thinking' ? 'LFM 1.2B Thinking' :
+                      config.model === 'anthropic/claude-3.5-sonnet' ? 'Claude 3.5 Sonnet' :
+                      config.model === 'openai/gpt-4o' ? 'GPT-4o' :
+                      config.model === 'google/gemini-2.0-flash-exp:free' ? 'Gemini 2.0 Flash' :
+                      config.model;
+    elements.currentModelSpan.textContent = modelName;
 }
 
 // Config Management
@@ -103,6 +151,9 @@ function saveConfig() {
 
 // Event Listeners
 function setupEventListeners() {
+    // Theme toggle
+    elements.themeToggle.addEventListener('click', toggleTheme);
+    
     // Model selection
     elements.modelSelect.addEventListener('change', (e) => {
         if (e.target.value === 'custom') {
@@ -131,17 +182,16 @@ function setupEventListeners() {
         updateCostEstimate();
     });
 
-    // Copy functionality
+    // Copy and select all functionality
     elements.copyBtn.addEventListener('click', copyOutput);
+    elements.selectAllBtn.addEventListener('click', selectAllOutput);
 
-    // Clear buttons
+    // Clear button
     elements.clearInputBtn.addEventListener('click', () => {
         elements.taklaBanglaInput.value = '';
         updateCharCount();
         updateCostEstimate();
     });
-
-    elements.clearOutputBtn.addEventListener('click', clearOutput);
 
     // Settings
     elements.settingsBtn.addEventListener('click', () => {
@@ -185,8 +235,7 @@ async function testApiKey() {
     }
 
     elements.testKeyBtn.disabled = true;
-    const originalHTML = elements.testKeyBtn.innerHTML;
-    elements.testKeyBtn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 1s linear infinite;"></i>Testing';
+    elements.testKeyBtn.textContent = 'Testing…';
     showTestStatus('Testing connection...', 'info');
 
     try {
@@ -204,41 +253,48 @@ async function testApiKey() {
         });
 
         if (response.status === 401) {
-            showTestStatus('❌ Invalid API key', 'error');
+            showTestStatus('Invalid API key.', 'error');
             elements.saveKeyBtn.disabled = true;
         } else if (response.status === 429) {
-            showTestStatus('⚠️ Rate limited - but key is valid', 'success');
+            showTestStatus('Rate limited - but key is valid.', 'success');
             elements.saveKeyBtn.disabled = false;
         } else if (response.ok) {
-            showTestStatus('✅ Connection successful!', 'success');
+            showTestStatus('Connection successful!', 'success');
             elements.saveKeyBtn.disabled = false;
         } else {
             const errorData = await response.json().catch(() => ({}));
-            showTestStatus(`❌ Error: ${errorData.error?.message || 'Unknown error'}`, 'error');
+            showTestStatus(`Error: ${errorData.error?.message || 'Unknown error'}`, 'error');
             elements.saveKeyBtn.disabled = true;
         }
     } catch (error) {
-        showTestStatus(`❌ Connection failed: ${error.message}`, 'error');
+        showTestStatus(`Connection failed: ${error.message}`, 'error');
         elements.saveKeyBtn.disabled = true;
     } finally {
         elements.testKeyBtn.disabled = false;
-        elements.testKeyBtn.innerHTML = originalHTML;
+        elements.testKeyBtn.textContent = 'Test Connection';
     }
 }
 
 function saveApiKey() {
     const apiKey = elements.apiKeyInput.value.trim();
     const modelValue = elements.modelSelect.value;
+    const storeLocal = elements.storeLocalCheckbox.checked;
     
     config.apiKey = apiKey;
     config.model = modelValue === 'custom' ? elements.customModelInput.value.trim() : modelValue;
     
-    saveConfig();
+    if (storeLocal) {
+        saveConfig();
+    } else {
+        // Only store in memory for this session
+        localStorage.removeItem(STORAGE_KEY);
+    }
     
     elements.setupModal.style.display = 'none';
     elements.mainApp.style.display = 'block';
     
-    showStatus('Settings saved successfully', 'success');
+    updateModelDisplay();
+    showStatus('Configuration saved', 'success');
 }
 
 // Safety Filter
@@ -269,17 +325,17 @@ async function translateText() {
     // Safety check
     const safetyCheck = checkSafety(input);
     if (!safetyCheck.safe) {
-        elements.bengaliOutput.innerHTML = `<span style="color: var(--error);">⚠️ Translation blocked due to unsafe content.</span>`;
+        elements.bengaliOutput.textContent = 'Translation blocked due to unsafe content.';
         elements.copyBtn.disabled = true;
-        elements.clearOutputBtn.disabled = false;
-        showStatus(safetyCheck.reason, 'error');
+        elements.selectAllBtn.disabled = false;
+        showStatus('Unsafe content detected', 'error');
         return;
     }
 
     // Disable UI during translation
     elements.translateBtn.disabled = true;
-    const originalHTML = elements.translateBtn.innerHTML;
-    elements.translateBtn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 1s linear infinite;"></i><span>Translating</span>';
+    elements.translateBtn.textContent = 'Translating…';
+    elements.taklaBanglaInput.disabled = true;
     elements.loadingIndicator.style.display = config.streaming ? 'none' : 'flex';
     clearOutput();
 
@@ -291,13 +347,13 @@ async function translateText() {
         }
         
         elements.copyBtn.disabled = false;
-        elements.clearOutputBtn.disabled = false;
-        showStatus('Translation complete!', 'success');
+        elements.selectAllBtn.disabled = false;
     } catch (error) {
         handleTranslationError(error);
     } finally {
         elements.translateBtn.disabled = false;
-        elements.translateBtn.innerHTML = originalHTML;
+        elements.translateBtn.textContent = 'Translate';
+        elements.taklaBanglaInput.disabled = false;
         elements.loadingIndicator.style.display = 'none';
     }
 }
@@ -402,30 +458,30 @@ function handleTranslationError(error) {
     let message = error.message;
     
     if (message.includes('401')) {
-        message = 'Invalid API key. Please check your settings.';
+        message = 'Invalid API key.';
     } else if (message.includes('429')) {
-        message = 'Rate limit exceeded. Please wait and try again, or switch models.';
+        message = 'Rate limit exceeded.';
     } else if (message.includes('5')) {
-        message = 'Provider error. Try switching to a different model.';
+        message = 'Provider error.';
     }
     
-    elements.bengaliOutput.innerHTML = `<span style="color: var(--error);">❌ ${message}</span>`;
+    elements.bengaliOutput.textContent = message;
     showStatus(message, 'error');
 }
 
 // UI Helpers
 function updateCharCount() {
     const count = elements.taklaBanglaInput.value.length;
-    elements.charCount.innerHTML = `<i class="ri-text"></i>${count} chars`;
+    elements.charCount.textContent = `${count} chars`;
 }
 
 function updateCostEstimate() {
     const chars = elements.taklaBanglaInput.value.length;
     const estimatedTokens = Math.ceil(chars / 4);
-    const estimatedCost = (estimatedTokens / 1000000) * 3; // Rough estimate: $3 per 1M tokens
+    const estimatedCost = (estimatedTokens / 1000000) * 3;
     
     if (estimatedTokens > 0) {
-        elements.estimatedCost.innerHTML = `<i class="ri-money-dollar-circle-line"></i>~$${estimatedCost.toFixed(4)}`;
+        elements.estimatedCost.textContent = `~$${estimatedCost.toFixed(4)}`;
     } else {
         elements.estimatedCost.textContent = '';
     }
@@ -435,26 +491,28 @@ function copyOutput() {
     const text = elements.bengaliOutput.textContent;
     
     navigator.clipboard.writeText(text).then(() => {
-        showStatus('Copied to clipboard!', 'success');
-        const originalHTML = elements.copyBtn.innerHTML;
-        elements.copyBtn.innerHTML = '<i class="ri-check-line"></i>';
+        const originalText = elements.copyBtn.textContent;
+        elements.copyBtn.textContent = 'Copied';
         setTimeout(() => {
-            elements.copyBtn.innerHTML = originalHTML;
-        }, 2000);
+            elements.copyBtn.textContent = originalText;
+        }, 1500);
     }).catch(() => {
         showStatus('Failed to copy', 'error');
     });
 }
 
+function selectAllOutput() {
+    const range = document.createRange();
+    range.selectNodeContents(elements.bengaliOutput);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+}
+
 function clearOutput() {
-    elements.bengaliOutput.innerHTML = `
-        <div class="placeholder-content">
-            <i class="ri-quill-pen-line"></i>
-            <p>Translation will appear here</p>
-        </div>
-    `;
+    elements.bengaliOutput.textContent = '';
     elements.copyBtn.disabled = true;
-    elements.clearOutputBtn.disabled = true;
+    elements.selectAllBtn.disabled = true;
 }
 
 function showStatus(message, type = 'info') {
