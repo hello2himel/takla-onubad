@@ -18,18 +18,28 @@
             </div>
 
             <div class="field">
-                <label>Model</label>
-                <select id="modelSelect">
-                    <option value="arcee-ai/trinity-large-preview">Trinity Large 400B (Free)</option>
-                    <option value="upstage/solar-pro-3">Solar Pro 3 102B (Free)</option>
-                    <option value="liquid/lfm-2.5-1.2b-thinking">LFM 1.2B Thinking (Free)</option>
-                    <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Paid)</option>
-                    <option value="openai/gpt-4o">GPT-4o (Paid)</option>
-                    <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Flash (Free)</option>
-                    <option value="custom">Custom Model</option>
-                </select>
-                <input type="text" id="customModel" placeholder="model/name" style="display: none;">
-            </div>
+    <label>Model</label>
+    <select id="modelSelect">
+        <!-- Default -->
+        <option value="meta-llama/llama-3.3-70b-instruct:free" selected>Llama 3.3 70B Instruct (Free, Default)</option>
+
+        <!-- Free Models -->
+        <option value="qwen/qwen3-next-80b-a3b-instruct:free">Qwen3 Next 80B A3B Instruct (Free)</option>
+        <option value="arcee-ai/trinity-mini:free">Trinity Mini (Free)</option>
+        <option value="google/gemma-3n-e2b-it:free">Gemma 3n E2B Instruct (Free)</option>
+
+        <!-- Paid Models -->
+        <option value="anthropic/claude-3.7-sonnet">Claude 3.7 Sonnet (Paid)</option>
+        <option value="openai/gpt-4o">GPT-4o (Paid)</option>
+        <option value="google/gemini-2.5-pro">Gemini 2.5 Pro (Paid)</option>
+
+        <!-- Custom -->
+        <option value="custom">Custom Model</option>
+    </select>
+
+    <input type="text" id="customModel" placeholder="model/name" style="display: none;">
+</div>
+
 
             <label class="checkbox">
                 <input type="checkbox" id="storeLocal" checked>
