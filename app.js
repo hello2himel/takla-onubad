@@ -400,7 +400,7 @@ Return only the corrected Bengali text.`;
 // State Management
 let config = {
     apiKey: '',
-    model: 'qwen/qwen3-next-80b-a3b-instruct:free',
+    model: 'stepfun/step-3.5-flash:free',
     temperature: 0,
     streaming: true,
     safety: false,
