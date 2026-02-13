@@ -1,168 +1,524 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Takla Onubad</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+<!doctype html>
+<html lang="bn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>টাকলা অনুবাদ</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
     <!-- API Key Modal -->
     <div id="setupModal" class="modal">
-        <div class="modal-box">
-            <h2>API Configuration</h2>
-            
-            <div class="field">
-                <label>OpenRouter API Key</label>
-                <input type="password" id="apiKey" placeholder="Enter OpenRouter API key">
-            </div>
+      <div class="modal-box">
+        <h2 data-i18n="modal.title">API সেটআপ</h2>
+        <p class="modal-intro">
+          <span data-i18n="modal.intro"
+            >আপনার OpenRouter API কী সংযুক্ত করুন।</span
+          >
+          <a
+            href="https://openrouter.ai/docs/quickstart"
+            target="_blank"
+            rel="noopener"
+            data-i18n="modal.guide"
+            >সেটআপ গাইড →</a
+          >
+        </p>
 
-            <div class="field">
-    <label>Model</label>
-    <select id="modelSelect">
-        <!-- Default -->
-        <option value="meta-llama/llama-3.3-70b-instruct:free" selected>Llama 3.3 70B Instruct (Free, Default)</option>
-
-        <!-- Free Models -->
-        <option value="qwen/qwen3-next-80b-a3b-instruct:free">Qwen3 Next 80B A3B Instruct (Free)</option>
-        <option value="arcee-ai/trinity-mini:free">Trinity Mini (Free)</option>
-        <option value="google/gemma-3n-e2b-it:free">Gemma 3n E2B Instruct (Free)</option>
-
-        <!-- Paid Models -->
-        <option value="anthropic/claude-3.7-sonnet">Claude 3.7 Sonnet (Paid)</option>
-        <option value="openai/gpt-4o">GPT-4o (Paid)</option>
-        <option value="google/gemini-2.5-pro">Gemini 2.5 Pro (Paid)</option>
-
-        <!-- Custom -->
-        <option value="custom">Custom Model</option>
-    </select>
-
-    <input type="text" id="customModel" placeholder="model/name" style="display: none;">
-</div>
-
-
-            <label class="checkbox">
-                <input type="checkbox" id="storeLocal" checked>
-                <span>Store locally on this device</span>
-            </label>
-
-            <p class="helper">Keys never pass through a server.</p>
-
-            <div id="testStatus" class="status"></div>
-
-            <div class="modal-actions">
-                <button id="testKeyBtn" class="btn-ghost">Test Connection</button>
-                <button id="saveKeyBtn" class="btn-primary" disabled>Save Key</button>
-            </div>
+        <div class="field">
+          <label data-i18n="modal.apiKeyLabel">OpenRouter API কী</label>
+          <input type="password" id="apiKey" placeholder="sk-or-v1-..." />
         </div>
+
+        <div class="field">
+          <label>
+            <span data-i18n="modal.modelLabel">মডেল</span>
+            <a
+              href="https://openrouter.ai/docs/quickstart"
+              target="_blank"
+              rel="noopener"
+              class="help-link"
+              data-i18n="modal.browseModels"
+              >মডেল দেখুন →</a
+            >
+          </label>
+          <div class="custom-select" id="modelSelectWrapper">
+            <div class="select-trigger">
+              <span id="selectedModel">Qwen 3 Next 80B (ফ্রি) ★</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M4 6L8 10L12 6"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </div>
+            <div class="select-options">
+              <div class="option-group">
+                <div class="option-group-label" data-i18n="modal.freeModels">
+                  ফ্রি মডেল
+                </div>
+                <div
+                  class="option"
+                  data-value="qwen/qwen3-next-80b-a3b-instruct:free"
+                >
+                  <span class="option-name">Qwen 3 Next 80B</span>
+                  <span class="option-badge free" data-i18n="badge.free"
+                    >ফ্রি</span
+                  >
+                  <span class="option-badge recommended">★</span>
+                </div>
+                <div class="option" data-value="deepseek/deepseek-r1-0528:free">
+                  <span class="option-name">DeepSeek R1</span>
+                  <span class="option-badge free" data-i18n="badge.free"
+                    >ফ্রি</span
+                  >
+                </div>
+                <div class="option" data-value="stepfun/step-3.5-flash:free">
+                  <span class="option-name">Step 3.5 Flash</span>
+                  <span class="option-badge free" data-i18n="badge.free"
+                    >ফ্রি</span
+                  >
+                </div>
+              </div>
+              <div class="option-group">
+                <div class="option-group-label" data-i18n="modal.paidModels">
+                  পেইড মডেল
+                </div>
+                <div class="option" data-value="anthropic/claude-3.5-sonnet">
+                  <span class="option-name">Claude 3.5 Sonnet</span>
+                  <span class="option-badge paid" data-i18n="badge.paid"
+                    >পেইড</span
+                  >
+                </div>
+                <div class="option" data-value="openai/gpt-4o">
+                  <span class="option-name">GPT-4o</span>
+                  <span class="option-badge paid" data-i18n="badge.paid"
+                    >পেইড</span
+                  >
+                </div>
+                <div
+                  class="option"
+                  data-value="google/gemini-2.0-flash-exp:free"
+                >
+                  <span class="option-name">Gemini 2.0 Flash</span>
+                  <span class="option-badge paid" data-i18n="badge.paid"
+                    >পেইড</span
+                  >
+                </div>
+              </div>
+              <div class="option-group">
+                <div class="option-group-label" data-i18n="modal.custom">
+                  কাস্টম
+                </div>
+                <div class="option" data-value="custom">
+                  <span class="option-name" data-i18n="modal.customModel"
+                    >কাস্টম মডেল আইডি</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+          <input
+            type="text"
+            id="customModel"
+            placeholder="model/name"
+            style="display: none"
+          />
+          <input
+            type="hidden"
+            id="modelValue"
+            value="qwen/qwen3-next-80b-a3b-instruct:free"
+          />
+        </div>
+
+        <label class="checkbox-wrapper">
+          <input type="checkbox" id="storeLocal" checked />
+          <span class="checkbox-custom"></span>
+          <span class="checkbox-label" data-i18n="modal.rememberSettings"
+            >এই ডিভাইসে আমার সেটিংস মনে রাখুন</span
+          >
+        </label>
+
+        <p class="helper">
+          <span data-i18n="modal.securityNote"
+            >আপনার API কী স্থানীয়ভাবে সংরক্ষণ করা হয় এবং কখনও আমাদের সার্ভারে
+            পাঠানো হয় না।</span
+          >
+          <a
+            href="https://openrouter.ai/docs/quickstart"
+            target="_blank"
+            rel="noopener"
+            data-i18n="modal.securityInfo"
+            >নিরাপত্তা তথ্য →</a
+          >
+        </p>
+
+        <div id="testStatus" class="status"></div>
+
+        <div class="modal-actions">
+          <button id="testKeyBtn" class="btn-ghost" data-i18n="modal.testBtn">
+            সংযোগ পরীক্ষা করুন
+          </button>
+          <button
+            id="saveKeyBtn"
+            class="btn-primary"
+            disabled
+            data-i18n="modal.saveBtn"
+          >
+            সংরক্ষণ করুন
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- About Modal -->
+    <div id="aboutModal" class="modal" style="display: none">
+      <div class="modal-box modal-about">
+        <button class="modal-close" id="closeAbout">×</button>
+        <h2 data-i18n="about.title">টাকলা অনুবাদ সম্পর্কে</h2>
+
+        <div class="about-content">
+          <section>
+            <h3 data-i18n="about.whatIsTitle">টাকলা অনুবাদ কী?</h3>
+            <p data-i18n="about.whatIsDesc">
+              টাকলা অনুবাদ একটি ভাষাগত মেরামত ইঞ্জিন যা ইংরেজি অক্ষরে লেখা বিকৃত
+              ফোনেটিক বাংলাকে সঠিক বাংলা লিপিতে রূপান্তরিত করে। এটি আধুনিক AI
+              ভাষা মডেল ব্যবহার করে অভিপ্রায় বুঝতে এবং ব্যাকরণগতভাবে সঠিক পাঠ্য
+              পুনর্গঠন করতে।
+            </p>
+          </section>
+
+          <section>
+            <h3 data-i18n="about.howWorksTitle">এটি কীভাবে কাজ করে</h3>
+            <p data-i18n="about.howWorksDesc">
+              শুধু আপনার ফোনেটিক বাংলা টেক্সট টাইপ করুন বা পেস্ট করুন (যেমন "ami
+              tore valo bashi") এবং AI এটিকে স্ট্যান্ডার্ড বাংলা স্ক্রিপ্টে
+              রূপান্তরিত করবে (আমি তোকে ভালো বাসি)। টুলটি বানান বৈচিত্র্য,
+              স্ল্যাং এবং এমনকি গুরুতর বিকৃতি পরিচালনা করে।
+            </p>
+          </section>
+
+          <section>
+            <h3 data-i18n="about.privacyTitle">গোপনীয়তা ও নিরাপত্তা</h3>
+            <ul>
+              <li data-i18n="about.privacy1">
+                কোন ব্যাকএন্ড সার্ভার নেই - সম্পূর্ণভাবে আপনার ব্রাউজারে চলে
+              </li>
+              <li data-i18n="about.privacy2">
+                API কী শুধুমাত্র আপনার ডিভাইসে স্থানীয়ভাবে সংরক্ষিত
+              </li>
+              <li data-i18n="about.privacy3">
+                কোন লগিং, ট্র্যাকিং বা ডেটা সংগ্রহ নেই
+              </li>
+              <li data-i18n="about.privacy4">
+                অনুবাদ সরাসরি OpenRouter এর মাধ্যমে প্রক্রিয়া করা হয়
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h3 data-i18n="about.techTitle">প্রযুক্তি</h3>
+            <ul>
+              <li>
+                <a href="https://openrouter.ai" target="_blank" rel="noopener"
+                  >OpenRouter</a
+                >
+                দ্বারা চালিত
+              </li>
+              <li data-i18n="about.tech2">
+                ক্লায়েন্ট-সাইড ইনফারেন্স (কোন সার্ভার নেই)
+              </li>
+              <li data-i18n="about.tech3">
+                স্ট্যাটিক হোস্টিং (যেকোনো জায়গায় স্থাপনযোগ্য)
+              </li>
+              <li data-i18n="about.tech4">ওপেন সোর্স ও ব্যবহার করতে ফ্রি</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3 data-i18n="about.sourceTitle">সোর্স কোড</h3>
+            <p data-i18n="about.sourceDesc">
+              এই প্রকল্পটি ওপেন সোর্স এবং GitHub এ উপলব্ধ:
+            </p>
+            <a
+              href="https://github.com/hello2himel/takla-onubad"
+              target="_blank"
+              rel="noopener"
+              class="btn-primary"
+              data-i18n="about.viewSource"
+            >
+              সোর্স কোড দেখুন →
+            </a>
+          </section>
+        </div>
+      </div>
     </div>
 
     <!-- Main App -->
-    <div id="mainApp" style="display: none;">
-        <!-- Header -->
-        <header class="header">
-            <div class="container">
-                <div class="logo">Takla Onubad</div>
-                <div class="header-actions">
-                    <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">
-                        <svg class="theme-icon sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                        </svg>
-                        <svg class="theme-icon moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
-                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                        </svg>
-                    </button>
-                    <button id="settingsBtn" class="icon-btn" aria-label="Settings">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m9-9h-6m-6 0H3"/>
-                        </svg>
-                    </button>
-                </div>
+    <div id="mainApp" style="display: none">
+      <!-- Header -->
+      <header class="header">
+        <div class="container">
+          <div class="logo" data-i18n="app.title">টাকলা অনুবাদ</div>
+          <div class="header-actions">
+            <button id="langToggle" class="lang-btn" aria-label="Language">
+              <span id="currentLang">বাং</span>
+            </button>
+            <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">
+              <svg
+                class="theme-icon"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="12" cy="12" r="5" />
+                <line x1="12" y1="1" x2="12" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="23" />
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                <line x1="1" y1="12" x2="3" y2="12" />
+                <line x1="21" y1="12" x2="23" y2="12" />
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+              </svg>
+            </button>
+            <div class="menu-wrapper">
+              <button id="menuToggle" class="icon-btn" aria-label="Menu">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="5" r="1.5" fill="currentColor" />
+                  <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+                  <circle cx="12" cy="19" r="1.5" fill="currentColor" />
+                </svg>
+              </button>
+              <div class="dropdown-menu" id="mainMenu">
+                <a href="#" id="aboutBtn" class="menu-item">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="16" x2="12" y2="12" />
+                    <circle cx="12" cy="8" r="0.5" fill="currentColor" />
+                  </svg>
+                  <span data-i18n="menu.about">সম্পর্কে</span>
+                </a>
+                <a
+                  href="https://github.com/hello2himel/takla-onubad"
+                  target="_blank"
+                  rel="noopener"
+                  class="menu-item"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"
+                    />
+                  </svg>
+                  <span data-i18n="menu.source">সোর্স কোড</span>
+                </a>
+                <a
+                  href="https://hello2himel.netlify.app/donate?source=taklaOnubad"
+                  target="_blank"
+                  rel="noopener"
+                  class="menu-item"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                    />
+                  </svg>
+                  <span data-i18n="menu.donate">ডোনেট করুন</span>
+                </a>
+                <div class="menu-divider"></div>
+                <a href="#" id="settingsMenuBtn" class="menu-item">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M12 1v6m0 6v6m9-9h-6m-6 0H3" />
+                  </svg>
+                  <span data-i18n="menu.settings">সেটিংস</span>
+                </a>
+              </div>
             </div>
-        </header>
-
-        <!-- Model Status -->
-        <div class="model-status">
-            <div class="container">
-                <span>Model: <span id="currentModel">Trinity Large 400B</span></span>
-                <span class="separator">|</span>
-                <a href="https://openrouter.ai/docs" target="_blank" rel="noopener">via OpenRouter</a>
-            </div>
+          </div>
         </div>
+      </header>
 
-        <!-- Main Content -->
-        <main class="main">
-            <div class="container">
-                <div class="translator">
-                    <!-- Input Panel -->
-                    <div class="panel">
-                        <div class="panel-label">Takla (Phonetic Bangla)</div>
-                        <textarea 
-                            id="taklaBanglaInput" 
-                            placeholder="Type or paste distorted Bangla written in English letters…"
-                            spellcheck="false"
-                        ></textarea>
-                        <div class="panel-toolbar">
-                            <div class="toolbar-left">
-                                <span id="charCount" class="meta">0 chars</span>
-                            </div>
-                            <div class="toolbar-right">
-                                <button id="clearInputBtn" class="btn-ghost-sm">Clear</button>
-                                <button id="translateBtn" class="btn-primary-sm">Translate</button>
-                            </div>
-                        </div>
-                    </div>
+      <!-- Model Status -->
+      <div class="model-status" id="modelStatusBar" role="button" tabindex="0">
+        <div class="container">
+          <div class="status-left">
+            <span class="status-label" data-i18n="status.using"
+              >ব্যবহার করছেন:</span
+            >
+            <strong id="currentModel">Qwen 3 Next 80B</strong>
+            <span class="status-badge free" data-i18n="badge.free">ফ্রি</span>
+          </div>
+          <a
+            href="https://openrouter.ai/docs/quickstart"
+            target="_blank"
+            rel="noopener"
+            class="status-link"
+          >
+            <span data-i18n="status.docs">OpenRouter ডকুমেন্টেশন</span>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"
+              />
+            </svg>
+          </a>
+        </div>
+      </div>
 
-                    <!-- Output Panel -->
-                    <div class="panel">
-                        <div class="panel-label">বাংলা</div>
-                        <div id="bengaliOutput" class="output" contenteditable="false"></div>
-                        <div class="panel-toolbar">
-                            <div class="toolbar-left">
-                                <span id="estimatedCost" class="meta"></span>
-                            </div>
-                            <div class="toolbar-right">
-                                <button id="selectAllBtn" class="btn-ghost-sm" disabled>Select All</button>
-                                <button id="copyBtn" class="btn-ghost-sm" disabled>Copy</button>
-                            </div>
-                        </div>
-                    </div>
+      <!-- Main Content (Centered) -->
+      <main class="main">
+        <div class="translator-wrapper">
+          <div class="translator">
+            <!-- Input Panel -->
+            <div class="panel">
+              <div class="panel-label" data-i18n="panel.input">
+                টাকলা (ফোনেটিক বাংলা)
+              </div>
+              <textarea
+                id="taklaBanglaInput"
+                data-i18n-placeholder="panel.inputPlaceholder"
+                placeholder="ইংরেজি অক্ষরে লেখা বিকৃত বাংলা টাইপ করুন বা পেস্ট করুন..."
+                spellcheck="false"
+              ></textarea>
+              <div class="panel-toolbar">
+                <div class="toolbar-left">
+                  <span id="charCount" class="meta">০ অক্ষর</span>
                 </div>
-
-                <!-- Advanced Settings -->
-                <details class="settings-panel">
-                    <summary>Advanced Options</summary>
-                    <div class="settings-content">
-                        <div class="setting-row">
-                            <label>Temperature <span id="tempValue">0.2</span></label>
-                            <input type="range" id="tempSlider" min="0" max="0.5" step="0.05" value="0.2">
-                        </div>
-                        <div class="setting-row">
-                            <label class="checkbox">
-                                <input type="checkbox" id="streamToggle" checked>
-                                <span>Enable streaming</span>
-                            </label>
-                        </div>
-                        <div class="setting-row">
-                            <label class="checkbox">
-                                <input type="checkbox" id="safetyToggle" checked>
-                                <span>Content safety filter</span>
-                            </label>
-                        </div>
-                    </div>
-                </details>
+                <div class="toolbar-right">
+                  <button
+                    id="clearInputBtn"
+                    class="btn-ghost-sm"
+                    data-i18n="btn.clear"
+                  >
+                    পরিষ্কার করুন
+                  </button>
+                  <button
+                    id="translateBtn"
+                    class="btn-primary-sm"
+                    data-i18n="btn.translate"
+                  >
+                    অনুবাদ করুন
+                  </button>
+                </div>
+              </div>
             </div>
-        </main>
+
+            <!-- Output Panel -->
+            <div class="panel">
+              <div class="panel-label">বাংলা</div>
+              <div class="output-wrapper">
+                <div
+                  id="bengaliOutput"
+                  class="output"
+                  contenteditable="false"
+                ></div>
+                <div
+                  id="outputSpinner"
+                  class="output-spinner"
+                  style="display: none"
+                >
+                  <div class="spinner-circle"></div>
+                </div>
+              </div>
+              <div class="panel-toolbar">
+                <div class="toolbar-left">
+                  <span id="estimatedCost" class="meta"></span>
+                </div>
+                <div class="toolbar-right">
+                  <button
+                    id="selectAllBtn"
+                    class="btn-ghost-sm"
+                    disabled
+                    data-i18n="btn.selectAll"
+                  >
+                    সব নির্বাচন করুন
+                  </button>
+                  <button
+                    id="copyBtn"
+                    class="btn-primary-sm"
+                    disabled
+                    data-i18n="btn.copy"
+                  >
+                    কপি করুন
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <div class="container">
+          <p class="footer-bengali">আসুন, বাংলা লিখি, বাংলায় লিখি!</p>
+
+          <a
+            href="https://github.com/hello2himel/takla-onubad"
+            target="_blank"
+            rel="noopener"
+            ><p class="footer-source">
+              এই সফটওয়্যারের উৎস সবার জন্য উন্মুক্ত →
+            </p></a
+          >
+        </div>
+      </footer>
     </div>
 
     <!-- Loading Spinner -->
-    <div id="loadingIndicator" class="loading" style="display: none;">
-        <div class="spinner"></div>
+    <div id="loadingIndicator" class="loading" style="display: none">
+      <div class="spinner"></div>
     </div>
 
     <!-- Toast -->
     <div id="statusBar" class="toast"></div>
 
-    <script type="module" src="app.js"></script>
-</body>
+    <script src="app.js"></script>
+  </body>
 </html>
