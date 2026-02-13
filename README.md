@@ -4,14 +4,15 @@ A fully client-side linguistic repair engine that converts chaotic phonetic Bang
 
 ## Features
 
-✅ **Modern, Minimal UI** - Professional design with Remix Icon  
+✅ **Ultra-Minimal UI** - Flat, monochrome, Google Translate-inspired  
+✅ **Free AI Models** - Trinity Large 400B, Solar Pro 3, more (all free!)  
+✅ **Auto Dark Mode** - Switches with system preference  
 ✅ **Zero Backend** - Runs entirely in your browser  
 ✅ **User-Owned API Keys** - Your keys never leave your device  
 ✅ **OpenRouter Integration** - Access 100+ AI models through one API  
 ✅ **Real-Time Streaming** - See translations as they're generated  
-✅ **Safety Filtering** - Optional content safety checks  
-✅ **Cost Estimation** - Know before you translate  
-✅ **Lightweight** - Under 50KB total bundle size
+✅ **Monospace Design** - JetBrains Mono font, clean typography  
+✅ **Lightning Fast** - Only 22KB bundle, loads instantly
 
 ## Quick Start
 
@@ -87,10 +88,16 @@ npx wrangler pages publish .
 
 ### Supported Models
 
-Default options:
-- `anthropic/claude-3.5-sonnet` (Recommended)
-- `openai/gpt-4o`
-- `google/gemini-2.0-flash-exp:free`
+**Free Models (Default):**
+- `arcee-ai/trinity-large-preview` - Trinity Large 400B (DEFAULT)
+- `upstage/solar-pro-3` - Solar Pro 3 102B
+- `liquid/lfm-2.5-1.2b-thinking` - LFM 1.2B Thinking
+- `liquid/lfm-2.5-1.2b-instruct` - LFM 1.2B Instruct
+- `google/gemini-2.0-flash-exp:free` - Gemini 2.0 Flash
+
+**Paid Models:**
+- `anthropic/claude-3.5-sonnet` - Claude 3.5 Sonnet
+- `openai/gpt-4o` - GPT-4o
 
 You can manually enter any OpenRouter model ID in custom mode.
 
@@ -120,7 +127,7 @@ OpenRouter API (https://openrouter.ai/api/v1)
 
 - First token: < 1.2s (with streaming)
 - Full translation: < 4s average
-- Bundle size: ~180KB (gzipped)
+- Bundle size: ~22KB uncompressed, ~8KB gzipped
 - Works offline after first load (with cached SDK)
 
 ## Browser Support
